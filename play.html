@@ -7,7 +7,7 @@
 <style>
 	.container-fluid{
 		background-image:url(wallpaper.png);
-		height:700px;
+		height:800px;
 	}
 	.text-primary{
 		color: black!important;
@@ -45,7 +45,8 @@
 		box-shadow: 1px 1px black;
 	}
 	#deck_zone{
-		border: 1px black solid;
+
+		padding: 9px;
 	}
 
 </style>
@@ -59,6 +60,73 @@
 </div>
 
 <script>
+var num_players = window.sessionStorage.getItem("num_players");
+var rows= [];
+var players =[];
+var preselected = ["bambu","clouds","fruits","orange","sunflower","violet","wood"]
+var elected = []
+for(var j=0; j< num_players;j++){
+	players.push({
+		as: 0,
+		bambu:0,
+		clouds:0,
+		fruits:0,
+		orange:0,
+		sunflower:0,
+		violet:0,
+		wood:0,
+		number2:0
+	})
+	var n= Math.floor(Math.random()*preselected.length);
+	players[j][preselected[n]] +=1
+	elected.push(preselected[n])
+	preselected.splice(n,1);
+}
+
+class Deck{
+	addCard(name){
+		this.cards.push(name);
+	}
+	drawCard(){
+		this.cards.pop;
+	}
+	shuffle(){
+		var l = this.cards.length;
+		var unchosen = this.cards.slice();
+		for(var i=0; i<l;i++){
+			var n = Math.floor(Math.random()*unchosen.length);
+			this.cards[i] = unchosen[n];
+			unchosen.splice(n,1);
+		}
+	}
+}
+
+var colorettoDeck = new Deck();
+colorettoDeck.cards=[];
+var colores= ["b","c","f","o","s","v","w"]
+if(num_players<=3){
+	var n = Math.floor(Math.random()*colores.length);
+	alert(n);
+	colores.splice(n,1);
+}
+
+for (var c=0; c<colores.length;c++){
+
+	for(var n=0; n<9;n++){
+		colorettoDeck.addCard(colores[c])
+	}
+}
+for (var n=0;n<10;n++){
+	colorettoDeck.addCard("2");
+}
+for(var n=0;n<3;n++){
+	colorettoDeck.addCard("a");
+}
+
+for(var i=0;i<5;i++){
+	colorettoDeck.shuffle()
+}
+
 function init(){
 	var num_players = parseInt(window.sessionStorage.getItem("num_players"))
 	var mainPage = document.getElementById("main_page");
