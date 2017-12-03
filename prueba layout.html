@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Coloreto</title>
+<link rel="stylesheet" href="bootstrap-4.0.0-alpha.6-dist/css/bootstrap.css"/>
+<style>
+	.container-fluid{
+		background-image:url(wallpaper.png);
+		height:700px;
+	}
+	.text-primary{
+		color: black!important;
+		font-size: 20px;
+	}
+	.welcome{
+		padding-top:20px;
+	}
+	.play_zone{
+		height: 120px;
+		border: 1px black solid;
+		background-color: white;
+		margin: 3px;
+	}
+	.common_cards_zone{
+		height: auto;
+		border: 1px black solid;
+		background-image: url(coloretto-zone.jpg);
+/*		-webkit-filter: blur(1px);
+		-moz-filter: blur(1px);
+		-o-filter: blur(1px);
+		-ms-filter: blur(1px);
+		filter: blur(1px);
+*/	}
+	.player{
+		background-image:url(wallpaper.png);
+		-webkit-filter: blur(5px);
+		-moz-filter: blur(5px);
+		-o-filter: blur(5px);
+		-ms-filter: blur(5px);
+		filter: blur(5px);
+	}
+	.image_row{
+		margin: 4px 3px 10px 3px;
+		box-shadow: 1px 1px black;
+	}
+
+</style>
+</head>
+
+<body>
+<script src="jquery-3.2.1.min.js"></script>
+<script src="jquery-ui-1.12.1/jquery-ui.js"></script>
+<div class="container-fluid" id="main_page">
+
+</div>
+
+<script>
+window.sessionStorage.setItem("num_players",5)
+function init(){
+	var num_players = parseInt(window.sessionStorage.getItem("num_players"))
+	var mainPage = document.getElementById("main_page");
+	var bigRow = document.createElement("div");
+	$(bigRow).addClass("row");
+	var playersZone = document.createElement("div");
+	var commonCardsZone = document.createElement("div");
+	$(playersZone).addClass("col-md-8 players_zone");
+	$(commonCardsZone).addClass("col-md-4 common_cards_zone").css("height",123*num_players );
+	mainPage.appendChild(bigRow);
+	bigRow.appendChild(playersZone);
+	bigRow.appendChild(commonCardsZone);		
+	for(var i=0; i<num_players;i++ ){
+		var row = document.createElement("div")
+		$(row).addClass("row play_zone");
+		playersZone.appendChild(row);
+		var zona_juego = document.createElement("div")
+		$(zona_juego).addClass("col-md-12 player");
+		row.appendChild(zona_juego);	
+		createRowsAndDeck(commonCardsZone)
+
+/*
+		commonCardsZone.appendChild(rowImage);
+*/		}
+	}
+	
+function createRowsAndDeck(commonCardsZone){
+		var rowImage = document.createElement("img");
+		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
+		var contenedor= document.createElement("div");
+		$(contenedor).addClass("contenedor");
+		contenedor.appendChild(rowImage);
+		commonCardsZone.appendChild(contenedor);
+		}
+
+init()
+
+</script>
+</body>
+</html>
+
