@@ -44,6 +44,9 @@
 		margin: 4px 3px 10px 3px;
 		box-shadow: 1px 1px black;
 	}
+	#deck_zone{
+		border: 1px black solid;
+	}
 
 </style>
 </head>
@@ -82,14 +85,14 @@ function init(){
 		commonCardsZone.appendChild(row);
 		row.appendChild(rowImage)
 		}
+	var row = document.createElement("div");
+	$(row).addClass("row");
+	$(row).html("<div class='col-md-8'> </div> <div class='col-md-4' id='deck_zone'> </div> ");
+	mainPage.appendChild(row);
+	var deckImage = document.createElement('img');
+	$(deckImage).attr("src","cardBackBig.jpg").attr("height","160px").addClass("img-responsive image_card_back");
+	$('#deck_zone').append(deckImage);
 	}
-	
-function createRowsAndDeck(n){
-		var rowImage = document.createElement("img");
-		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
-	
-
-}
 
 init()
 

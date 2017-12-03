@@ -44,6 +44,13 @@
 		margin: 4px 3px 10px 3px;
 		box-shadow: 1px 1px black;
 	}
+	.contenedor{
+		height:250px !important;
+		width: 180px;
+		display: inline;
+		margin:0px 30px 200px 30px !important;
+	
+	}
 
 </style>
 </head>
@@ -89,7 +96,11 @@ function createRowsAndDeck(commonCardsZone){
 		var contenedor= document.createElement("div");
 		$(contenedor).addClass("contenedor");
 		contenedor.appendChild(rowImage);
+		var rowImage = document.createElement("img");
+		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
+		contenedor.appendChild(rowImage);
 		commonCardsZone.appendChild(contenedor);
+	
 		}
 
 init()
