@@ -18,10 +18,11 @@
 		padding-top:20px;
 	}
 	.play_zone{
-		height: 120px;
+		height: 140px;
 		border: 1px rgba(13,90,12,1.00) solid;
 		box-shadow: 1px 1px green;
 		margin: 3px;
+		position: relative;
 	}
 	.common_cards_zone{
 		height: auto;
@@ -34,7 +35,7 @@
 		background-image:url(wallpaperblur.png);
 	}
 	.image_row{
-		margin: 4px 3px 10px 3px;
+		margin: 4px 3px 0px 3px;
 		box-shadow: 1px 1px 2px black ;
 	}
 	#deck_zone{
@@ -62,6 +63,17 @@
 		text-align: center;
 		padding-bottom: 20px;
 	}
+	.name_of_player{
+		height: 18px;
+		position: absolute;
+		bottom: 12px;
+		left: 15px;
+		margin-bottom: 0px !important;
+		font-weight: 600;
+		text-shadow: 1px 1px 1px white;
+		color: rgba(12,53,7,1.00)
+	}
+	
 
 </style>
 </head>
@@ -108,6 +120,7 @@ var preselected = colores.slice();
 var elected = [];
 var players =[];
 colores.push("as","plus2");
+
 for(var j=0; j< num_players;j++){
 	var dict = {};
 	for(var c=0;c<colores.length;c++){
@@ -130,14 +143,14 @@ function init(){
 	var playersZone = document.createElement("div");
 	var commonCardsZone = document.createElement("div");
 	$(playersZone).addClass("col-md-8").attr("id","players_zone").attr("ng-controller","");
-	$(commonCardsZone).addClass("col-md-4 common_cards_zone").css("height",123*num_players );
+	$(commonCardsZone).addClass("col-md-4 common_cards_zone").css("height",118*num_players+125);
 	mainPage.appendChild(bigRow);
 	bigRow.appendChild(playersZone);
 	bigRow.appendChild(commonCardsZone);		
 	for(var i=0; i<num_players;i++ ){
-		var row = document.createElement("div")
-		$(row).addClass("row play_zone");
-		playersZone.appendChild(row);
+		var play_zone = document.createElement("div")
+		$(play_zone).addClass("row play_zone").attr("id","row"+i);		
+		playersZone.appendChild(play_zone);
 		var rowImage = document.createElement("img");
 		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
 		var row = document.createElement("div");
@@ -145,17 +158,19 @@ function init(){
 		commonCardsZone.appendChild(row);
 		row.appendChild(rowImage)
 		}
-	var row = document.createElement("div");
-	$(row).addClass("row");
-	$(row).html("<div class='col-md-8'> </div> <div class='col-md-4' id='deck_zone'> </div> ");
-	mainPage.appendChild(row);
+	var deck_zone = document.createElement("div");
+	$(deck_zone).addClass("row").html("<div class='col-md-2' id='deck_zone'></div><div class='col-md-2' id='card_to_play'> </div> <div class='col-md-8'></div>");
+	commonCardsZone.appendChild(deck_zone);
 	var deckImage = document.createElement('img');
-	$(deckImage).attr("src","cardBackRotatedjpg.jpg").addClass("img-responsive image_card_back");
+	$(deckImage).attr("src","cardBackRotatedjpg.jpg").addClass("img-responsive image_card_back").attr("id","card_back");
 	$('#deck_zone').append(deckImage);
+
 	addCardImagesToRow(num_players);
+	addEventListeners()
 	}
 
 function addCardImagesToRow(num_players){
+	var colores=["bambu","clouds","fruits","orange","sunflower","violet","wood","as","plus2"]
 	for(var r=0;r<num_players;r++){
 		for(var i=0;i<colores.length;i++){
 			var container = document.createElement("div");
@@ -166,8 +181,17 @@ function addCardImagesToRow(num_players){
 			var img= document.createElement("img");
 			$(img).attr("src","cards/"+colores[i]+".png").attr("height","110px").addClass("img-responsive image_cards_player");
 			container.appendChild(img);
-			document.getElementById("players_zone").children[r].appendChild(container);
+			$("#row"+r).append(container);
 		}
+		var name_of_player = document.createElement("p");
+		$(name_of_player).addClass("name_of_player text-primary");
+		if(r==0){
+			$(name_of_player).html("Player");	
+		}
+		else{
+			$(name_of_player).html("Opponent #"+r);
+		}
+		$("#row"+r).append(name_of_player)
 	}
 }
 
@@ -208,6 +232,13 @@ function prepareDeck(){
 	colorettoDeck.cards.splice(15,0,"e");
 	updateCards();
 }
+
+function addEventListeners(){
+	$("#card_back").dblclick(function(){
+		
+	})
+}
+
 </script>
 </body>
 </html>
