@@ -34,25 +34,21 @@
 	}
 	.image_row{
 		margin: 4px 3px 10px 3px;
-		box-shadow: 1px 1px 2px black ;
+		box-shadow: 1px 1px black;
+		z-index: 1;
 	}
 	#deck_zone{
+
 		padding: 9px;
 	}
 	.image_cards_player{
-		box-shadow: 1px 1px 2px black ;
-		position: absolute;
+		margin: 4px 3px 10px 3px;
+		box-shadow: 1px 1px black;
+		z-index: 1;
+
 	}
 	.container_card{
 		display: inline-block;
-		margin:2px 10px 0px 2px;
-		position: relative;
-	}
-	.number_of_cards{
-		position: absolute;
-		top: 90px;
-		left: 35px;
-		z-index: 1;
 	}
 
 </style>
@@ -65,7 +61,7 @@
 </div>
 
 <script>
-var num_players = window.sessionStorage.getItem("num_players");
+var num_players = 4;
 var rows= [];
 
 class Deck{
@@ -122,25 +118,12 @@ colores.push("as","plus2")
 function addCardImagesToRow(num_players){
 	for(var r=0;r<num_players;r++){
 		for(var i=0;i<colores.length;i++){
-/*			var container = document.createElement("div");
-			$(container).addClass("container_card");
-*/			
 			var container = document.createElement("div");
-			$(container).addClass("container_card col-md-1");
-			
-			var number = document.createElement("p");
-			$(number).attr("id","player_"+r+"_"+colores[i]).addClass("number_of_cards").html("hola");
-			container.appendChild(number);
+			$(container).addClass("container_card");
 			var img= document.createElement("img");
 			$(img).attr("src","cards/"+colores[i]+".png").attr("height","110px").addClass("img-responsive image_cards_player");
 			container.appendChild(img);
-/*			document.getElementById("players_zone").children[r].children[0].appendChild(container);
-*/
-			document.getElementById("players_zone").children[r].appendChild(container);
-/*			var empty_container = document.createElement("div");
-			$(empty_container).addClass("col-md-2");
-			document.getElementById("players_zone").children[r].appendChild(empty_container);
-*/		
+			document.getElementById("players_zone").children[r].children[0].appendChild(container);
 		}
 	}
 }
@@ -190,10 +173,10 @@ function init(){
 		var row = document.createElement("div")
 		$(row).addClass("row play_zone");
 		playersZone.appendChild(row);
-		/*var zona_juego = document.createElement("div")
+		var zona_juego = document.createElement("div")
 		$(zona_juego).addClass("col-md-12 player");
 		row.appendChild(zona_juego);
-		*/
+		
 		
 		
 		var rowImage = document.createElement("img");
