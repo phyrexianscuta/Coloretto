@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Coloretto</title>
 <link rel="stylesheet" href="bootstrap-4.0.0-alpha.6-dist/css/bootstrap.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <style>
 	.container-fluid{
 		background-image:url(wallpaper.png);
@@ -50,9 +51,16 @@
 	}
 	.number_of_cards{
 		position: absolute;
-		top: 90px;
-		left: 35px;
+		top: 85px;
+		left: 46px;
 		z-index: 1;
+		height: 20px;
+		background-color: white;
+		color: black;
+		font-weight: bold;
+		width: 15px;
+		text-align: center;
+		padding-bottom: 20px;
 	}
 
 </style>
@@ -61,13 +69,14 @@
 <body>
 <script src="jquery-3.2.1.min.js"></script>
 <script src="jquery-ui-1.12.1/jquery-ui.js"></script>
+
 <div class="container-fluid" id="main_page">
 </div>
 
 <script>
 var num_players = window.sessionStorage.getItem("num_players");
 var rows= [];
-
+var colores= ["bambu","clouds","fruits","orange","sunflower","violet","wood"];
 class Deck{
 	addCard(name){
 		this.cards.push(name);
@@ -88,90 +97,30 @@ class Deck{
 var colorettoDeck = new Deck();
 colorettoDeck.cards=[];
 
-var colores= ["bambu","clouds","fruits","orange","sunflower","violet","wood"];
 if(num_players<=3){
 	var n = Math.floor(Math.random()*colores.length);
 	colores.splice(n,1);
 }
 
+init()
+
 var preselected = colores.slice();
 var elected = [];
 var players =[];
+colores.push("as","plus2");
 for(var j=0; j< num_players;j++){
-	players.push({
-		as: 0,
-		bambu:0,
-		clouds:0,
-		fruits:0,
-		orange:0,
-		sunflower:0,
-		violet:0,
-		wood:0,
-		number2:0
-	})
+	var dict = {};
+	for(var c=0;c<colores.length;c++){
+		dict[colores[c]] = 0;
+	}
+	players.push(dict);
 	var n= Math.floor(Math.random()*preselected.length);
-	players[j][preselected[n]] += 1;
+	addCard(j,preselected[n])
 	elected.push(preselected[n]);
 	preselected.splice(n,1);
-	
-	
 }
 
-colores.push("as","plus2")
-
-function addCardImagesToRow(num_players){
-	for(var r=0;r<num_players;r++){
-		for(var i=0;i<colores.length;i++){
-/*			var container = document.createElement("div");
-			$(container).addClass("container_card");
-*/			
-			var container = document.createElement("div");
-			$(container).addClass("container_card col-md-1");
-			
-			var number = document.createElement("p");
-			$(number).attr("id","player_"+r+"_"+colores[i]).addClass("number_of_cards").html("hola");
-			container.appendChild(number);
-			var img= document.createElement("img");
-			$(img).attr("src","cards/"+colores[i]+".png").attr("height","110px").addClass("img-responsive image_cards_player");
-			container.appendChild(img);
-/*			document.getElementById("players_zone").children[r].children[0].appendChild(container);
-*/
-			document.getElementById("players_zone").children[r].appendChild(container);
-/*			var empty_container = document.createElement("div");
-			$(empty_container).addClass("col-md-2");
-			document.getElementById("players_zone").children[r].appendChild(empty_container);
-*/		
-		}
-	}
-}
-
-
-	
-
-for (var c=0; c<colores.length;c++){
-	if(elected.indexOf(colores[c]) >-1){
-		for(var n=0; n<8;n++){
-			colorettoDeck.addCard(colores[c][0])
-		}
-	}
-	else{
-		for(var n=0; n<9;n++){
-			colorettoDeck.addCard(colores[c][0])
-		}
-	}
-}
-
-for (var n=0;n<10;n++){
-	colorettoDeck.addCard("2");
-	}
-for(var n=0;n<3;n++){
-	colorettoDeck.addCard("a");
-	}
-for(var i=0;i<5;i++){
-	colorettoDeck.shuffle()
-	}
-
-colorettoDeck.cards.splice(15,0,"e");
+prepareDeck();
 
 function init(){
 	var num_players = parseInt(window.sessionStorage.getItem("num_players"))
@@ -180,8 +129,7 @@ function init(){
 	$(bigRow).addClass("row");
 	var playersZone = document.createElement("div");
 	var commonCardsZone = document.createElement("div");
-	$(playersZone).addClass("col-md-8");
-	$(playersZone).attr("id","players_zone")
+	$(playersZone).addClass("col-md-8").attr("id","players_zone").attr("ng-controller","");
 	$(commonCardsZone).addClass("col-md-4 common_cards_zone").css("height",123*num_players );
 	mainPage.appendChild(bigRow);
 	bigRow.appendChild(playersZone);
@@ -190,12 +138,6 @@ function init(){
 		var row = document.createElement("div")
 		$(row).addClass("row play_zone");
 		playersZone.appendChild(row);
-		/*var zona_juego = document.createElement("div")
-		$(zona_juego).addClass("col-md-12 player");
-		row.appendChild(zona_juego);
-		*/
-		
-		
 		var rowImage = document.createElement("img");
 		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
 		var row = document.createElement("div");
@@ -213,8 +155,59 @@ function init(){
 	addCardImagesToRow(num_players);
 	}
 
-init()
+function addCardImagesToRow(num_players){
+	for(var r=0;r<num_players;r++){
+		for(var i=0;i<colores.length;i++){
+			var container = document.createElement("div");
+			$(container).addClass("container_card col-md-1");
+			var number = document.createElement("p");
+			$(number).attr("id","player_"+r+"_"+colores[i]).addClass("number_of_cards");
+			container.appendChild(number);
+			var img= document.createElement("img");
+			$(img).attr("src","cards/"+colores[i]+".png").attr("height","110px").addClass("img-responsive image_cards_player");
+			container.appendChild(img);
+			document.getElementById("players_zone").children[r].appendChild(container);
+		}
+	}
+}
 
+function addCard(jugador,carta){
+	players[jugador][carta]+=1
+}
+	
+function updateCards(){
+	for( var player =0; player < num_players; player++){
+		for (var c =0; c< colores.length; c++){
+			$("#player_"+player+"_"+colores[c]).html(players[player][colores[c]]);
+		}
+	}
+}
+
+function prepareDeck(){
+	for (var c=0; c<colores.length-2;c++){
+	if(elected.indexOf(colores[c]) >-1){
+		for(var n=0; n<8;n++){
+			colorettoDeck.addCard(colores[c][0])
+		}
+	}
+	else{
+		for(var n=0; n<9;n++){
+			colorettoDeck.addCard(colores[c][0])
+		}
+	}
+}
+	for (var n=0;n<10;n++){
+		colorettoDeck.addCard("2");
+		}
+	for(var n=0;n<3;n++){
+		colorettoDeck.addCard("a");
+		}
+	for(var i=0;i<5;i++){
+		colorettoDeck.shuffle()
+		}
+	colorettoDeck.cards.splice(15,0,"e");
+	updateCards();
+}
 </script>
 </body>
 </html>
