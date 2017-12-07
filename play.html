@@ -271,7 +271,7 @@ function addEventListeners(){
 			}
 		}
 	});
-
+	$("img[src$='rows.png']").on("dblclick",doubleClickRow )
 
 }
 
@@ -281,7 +281,10 @@ function doubleClickDeck(){
 		$(newCard).attr("src","cards/"+checkTopCard()+".png" ).addClass("card_to_play_class").attr("alt",checkTopCard() ).appendTo("#card_to_play").draggable({containment: ".common_cards_zone", scroll: false, snap: ".row", snapMode: "inner", helper:"clone",opacity: 0.6});
 		colorettoDeck.cards.pop()
 	}
+}
 
+function doubleClickRow(){
+	
 }
 
 function checkTopCard(){
