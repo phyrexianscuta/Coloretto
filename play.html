@@ -266,7 +266,7 @@ function addEventListeners(){
 			}
 		},
 		accept: function(){
-			if(rows[($(this)[0].id)[8]].length<3){
+			if(rows[($(this)[0].id)[8]].length<3 && !$($(this)[0].children[0]).hasClass("rotated")){
 				return true;
 			}
 		}
@@ -283,8 +283,10 @@ function doubleClickDeck(){
 	}
 }
 
-function doubleClickRow(){
-	
+function doubleClickRow(event){
+	if($("#card_to_play").html()==" "){
+		$(this).css("transform", "rotate(90deg)").css("margin-left","21px").css("margin-right","22px").addClass("rotated");
+	}
 }
 
 function checkTopCard(){
