@@ -36,10 +36,13 @@
 	}
 	.image_row{
 		margin: 4px 3px 0px 3px;
-		box-shadow: 1px 1px 2px black ;
+		box-shadow: 1px 1px 2px black;
 	}
 	#deck_zone{
-		padding: 9px;
+		display:inline-block;
+		height: 118px;
+		width: 178px;
+		margin-top: 10px;
 	}
 	.image_cards_player{
 		box-shadow: 1px 1px 2px black ;
@@ -73,8 +76,21 @@
 		text-shadow: 1px 1px 1px white;
 		color: rgba(12,53,7,1.00)
 	}
-	
-
+	.card_to_play_class{
+		height:110px;
+		width:73px;
+		position: absolute;
+		bottom: 0px;
+	}
+	#card_to_play{
+		position: relative;
+	}
+	.ui-state-hover{
+		  background:rgba(255,255,255,0.5);
+	}
+	.card_in_row{
+		height: 110px;
+	}
 </style>
 </head>
 
@@ -122,6 +138,7 @@ var players =[];
 colores.push("as","plus2");
 
 for(var j=0; j< num_players;j++){
+	rows.push([]);
 	var dict = {};
 	for(var c=0;c<colores.length;c++){
 		dict[colores[c]] = 0;
@@ -154,12 +171,13 @@ function init(){
 		var rowImage = document.createElement("img");
 		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
 		var row = document.createElement("div");
-		$(row).addClass("row");
+		$(row).addClass("row row_opt").attr("id","row_opt_"+i);
 		commonCardsZone.appendChild(row);
 		row.appendChild(rowImage)
 		}
 	var deck_zone = document.createElement("div");
-	$(deck_zone).addClass("row").html("<div class='col-md-2' id='deck_zone'></div><div class='col-md-2' id='card_to_play'> </div> <div class='col-md-8'></div>");
+/*  $(deck_zone).addClass("row").html("<div class='col-md-2' id='deck_zone'></div><div class='col-md-2' id='card_to_play'> </div> <div class='col-md-8'></div>");*/
+	$(deck_zone).addClass("row").html("<div id='deck_zone'></div><div class='col-md-2' id='card_to_play'> </div> <div class='col-md-8'></div>");
 	commonCardsZone.appendChild(deck_zone);
 	var deckImage = document.createElement('img');
 	$(deckImage).attr("src","cardBackRotatedjpg.jpg").addClass("img-responsive image_card_back").attr("id","card_back");
@@ -234,9 +252,78 @@ function prepareDeck(){
 }
 
 function addEventListeners(){
-	$("#card_back").dblclick(function(){
-		
-	})
+	$("#card_back").on("dblclick",doubleClickDeck);
+	$(".common_cards_zone .row_opt").droppable({
+		classes: {"ui-droppable-hover": "ui-state-hover"},
+		drop: function(event,ui){
+			$("#card_to_play").html(" ");
+			ui.helper.clone().removeClass().addClass("card_in_row image_row").attr("style"," ").appendTo($(this));
+			if(ui.helper[0].alt[0]=="p"){
+				rows[($(this)[0].id)[8]].push("2");
+			}
+			else{
+				rows[($(this)[0].id)[8]].push(ui.helper[0].alt[0]);
+			}
+		},
+		accept: function(){
+			if(rows[($(this)[0].id)[8]].length<3){
+				return true;
+			}
+		}
+	});
+
+
+}
+
+function doubleClickDeck(){
+	if($("#card_to_play").html()==" " && !checkRowsFull() ){
+		var newCard = document.createElement("img");
+		$(newCard).attr("src","cards/"+checkTopCard()+".png" ).addClass("card_to_play_class").attr("alt",checkTopCard() ).appendTo("#card_to_play").draggable({containment: ".common_cards_zone", scroll: false, snap: ".row", snapMode: "inner", helper:"clone",opacity: 0.6});
+		colorettoDeck.cards.pop()
+	}
+
+}
+
+function checkTopCard(){
+	if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "a"){
+		return "as"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "b"){
+		return "bambu"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "c"){
+		return "clouds"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "e"){
+		return "end"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "f"){
+		return "fruits"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "o"){
+		return "orange"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "2"){
+		return "plus2"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "s"){
+		return "sunflower"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "v"){
+		return "violet"
+	}
+	else if(colorettoDeck.cards[colorettoDeck.cards.length -1] == "w"){
+		return "wood"
+	}
+}
+
+function checkRowsFull(){
+	for (var i=0; i< num_players; i++){
+		if(rows[i].length<3){
+			return false;
+		}
+	}
+	return true
 }
 
 </script>
