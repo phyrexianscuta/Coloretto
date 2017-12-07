@@ -49,6 +49,9 @@
 		margin: 4px 3px 10px 3px;
 		box-shadow: 1px 1px black;
 	}
+	.rules{		
+		margin-top: 40px
+	}
 
 </style>
 </head>
@@ -73,50 +76,18 @@
 			</select>
 		</form>
 	</div>
-	<button value="Ok" class="btn-primary" onClick="play()"> Play! </button>	
+	<button value="Ok" class="btn-primary" onClick="play()"> Play! </button>
+	
+	<footer class="row rules"><a class="col-md-4 text-primary" href="Rules.html"> Reglas </a> </footer>
 </div>
 
 <script>
 function play(){
 	var num_players = document.number_players.option_num_players.value;
 	window.sessionStorage.setItem("num_players",num_players)
-/*	$("#main_page").html("")
-*/
 	window.location.href= "play.html"
-/*	createPlayTable(num_players);
-*/}
-
-/*
-function createPlayTable(num_players){
-	var mainPage = document.getElementById("main_page");
-	var bigRow = document.createElement("div");
-	$(bigRow).addClass("row");
-	var playersZone = document.createElement("div");
-	var commonCardsZone = document.createElement("div");
-	$(playersZone).addClass("col-md-8 players_zone");
-	$(commonCardsZone).addClass("col-md-4 common_cards_zone").css("height",123*num_players );
-	mainPage.appendChild(bigRow);
-	bigRow.appendChild(playersZone);
-	bigRow.appendChild(commonCardsZone);		
-	for(var i=0; i<num_players;i++ ){
-		var row = document.createElement("div")
-		$(row).addClass("row play_zone");
-		playersZone.appendChild(row);
-		var zona_juego = document.createElement("div")
-		$(zona_juego).addClass("col-md-12 player");
-		row.appendChild(zona_juego);
-		
-		var rowImage = document.createElement("img");
-		$(rowImage).attr("src","rows.png").attr("height","110px").addClass("img-responsive image_row");
-		var row = document.createElement("div");
-		$(row).addClass("row");
-		commonCardsZone.appendChild(row);
-		row.appendChild(rowImage)
-		
-	}
-
 }
-*/
+
 
 </script>
 </body>
