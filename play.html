@@ -7,6 +7,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 
 <style>
+	.helper_joker{
+		z-index: 2;
+	}
+
 	.container-fluid{
 		background-image:url(wallpaper.png);
 		height:800px;
@@ -56,26 +60,25 @@
 	}
 	.number_of_cards{
 		position: absolute;
-		top: 85px;
-		left: 46px;
+		bottom: 12px;
+		left: 41px;
 		z-index: 1;
-		height: 20px;
+		height: 15px;
 		background-color: white;
 		color: black;
 		font-weight: bold;
-		width: 15px;
+		width: 20px;
 		text-align: center;
-		padding-bottom: 20px;
+		line-height: 15px;
 	}
 	.name_of_player{
-		height: 18px;
+		height: auto;
 		position: absolute;
-		bottom: 12px;
+		bottom: -19px;
 		left: 15px;
-		margin-bottom: 0px !important;
 		font-weight: 600;
 		text-shadow: 1px 1px 1px white;
-		color: rgba(12,53,7,1.00)
+		color: rgba(12,53,7,1.00);
 	}
 	.card_to_play_class{
 		height:110px;
@@ -121,7 +124,68 @@
 		z-index: 2;
 		text-align: center;
 	}
+	.texto_score{
+		font-size: 35px;
+		font-weight: 700;
+ 		width: 72px;
+  		text-align: center;
+		animation-duration: 0.5s !important;
+	}
+	.plus{
+		color: lawngreen;
+	}
 	
+	.minus{
+		color: red;
+	}
+	
+	.cero{
+		color: gray;
+		font-weight: 800;
+ 		width: 72px;
+  		text-align: center;
+	}
+	.points{
+		color: greenyellow;
+		font-size: 25px;
+		text-shadow: 1px 1px 1px grey;
+		display: inline;
+	}
+	.alert {
+    padding: 7px;
+    background-color: #f44336; /* Red */
+    color: white;
+    margin-bottom: 15px;
+	width: 110px;
+	height: 135px;
+	opacity: 0.7	;
+	z-index: 4;
+	margin-top:2px;
+	position: relative;
+	font-size: 14px;
+	margin-left: 7px;
+}
+
+/* The close button */
+	.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+	position: absolute;
+	top: 0px;
+	right: 3px;
+	
+}
+
+/* When moving the mouse over the close button */
+	.closebtn:hover {
+    color: black;
+}
 </style>
 <link href="animate.css" rel="stylesheet" type="text/css">
 <script>
@@ -131,6 +195,7 @@ var colores= ["bambu","clouds","fruits","orange","sunflower","violet","wood"];
 var elected = [];
 var players =[];
 var lastRound = false
+finalScore = {}
 </script>
 </head>
 
@@ -183,10 +248,12 @@ for(var j=0; j< num_players;j++){
 	addCard(j,preselected[n])
 	elected.push(preselected[n]);
 	preselected.splice(n,1);
+	finalScore["player"+j] = 0;
 }
 
 prepareDeck();
 
+	
 function init(){
 	var num_players = parseInt(window.sessionStorage.getItem("num_players"))
 	var mainPage = document.getElementById("main_page");
@@ -282,7 +349,7 @@ function prepareDeck(){
 	for(var i=0;i<5;i++){
 		colorettoDeck.shuffle()
 		}
-	colorettoDeck.cards.splice(71,0,"e");
+	colorettoDeck.cards.splice(15,0,"e");
 	updateCards();
 }
 
@@ -326,7 +393,9 @@ function doubleClickDeck(){
 						colorettoDeck.cards.pop();
 						doubleClickDeck();
 					},1000)
-
+					window.setTimeout(function(){
+						$(text_last_round).remove()
+					},2000)
 				},2000);
 				lastRound = true;
 			}
@@ -355,6 +424,10 @@ function doubleClickRow(event){
 					$(text_finish).removeClass("zoomIn").addClass("zoomOut");
 				},2000);
 				
+				setTimeout(function(){
+					$(text_finish).remove();
+				},3000);
+				
 				for(var i=0; i<num_players;i++){
 					var row= $("#row_opt_"+i)[0];
 					$(row.children[0]).remove();
@@ -366,8 +439,12 @@ function doubleClickRow(event){
 				var deckImage = document.createElement('img');
 				$(deckImage).attr("src","cardBackRotatedjpg.jpg").addClass("img-responsive image_card_back").attr("id","card_back");
 				$('#deck_zone').append(deckImage);
-				finalCount()
-
+				if(players[0]["as"]>0){
+					changeJokers();
+				}
+				else{
+					finalCount(2000)
+				}
 			}
 			else{
 				for (var j=0; j < $("img[src$='rows.png']").length ; j++ ){
@@ -380,13 +457,64 @@ function doubleClickRow(event){
 	}
 }
 
-function finalCount(){
-	for (var i=0; i < num_players;i++){
-		showPointsOfColour(i)
+function changeJokers(){
+	createAlertBox()
+	$("#row0").find("img[src='cards/as.png']").draggable({
+		containment: "#row0", 
+		scroll: false, 
+		snap: "container_card", 
+		snapMode: "inner", 
+		helper:"clone",
+		start: function(e, ui){
+			$(ui.helper).addClass("helper_joker");
+ 			},
+		opacity: 0.6
+	});
+	var cards = $("#row0").children(".container_card");
+	for (var j=0; j < cards.length; j++){
+		$(cards[j]).droppable({
+			classes: {"ui-droppable-hover": "ui-state-hover"},
+			drop: function(event,ui){
+				if(players[0]["as"]>0){
+					players[0]["as"] -=1
+					var nameDropPlace = getName($(this));
+					players[0][nameDropPlace] +=1
+					$(ui.helper).remove();
+					updateCards()
+					if(players[0]["as"]== 0){
+						for(var k=0; k < cards.length;k++){
+							$(cards[k]).droppable('disable')
+						}
+					/*	$(ui).draggable("disable")
+					*/	finalCount(0);
+					}
+				}
+			},
+			accept: function(){
+					return true;
+			}
+		})
 	}
 }
 
-function showPointsOfColour(i){
+function createAlertBox(){
+	var alertJokers = document.createElement("div")
+	$(alertJokers).addClass("alert");
+	var alertJokersSpan = document.createElement("span");
+	$(alertJokersSpan).addClass("closebtn").on("click",event,function(event){
+		event.target.parentElement.style.display='none' 
+	}).html("&times;");
+	$(alertJokers).append(document.createTextNode("You have "+players[0]["as"]+" jokers to distribute. Drag them to the desired colour.")).append(alertJokersSpan).insertAfter($("#row0").children(".container_card")[$("#row0").children(".container_card").length-2]);
+
+}
+
+function finalCount(initTime){
+	for (var i=0; i < num_players;i++){
+		showPointsOfColour(i,initTime)
+	}
+}
+
+function showPointsOfColour(i,initTime){
 	var arrayScore= window.players[i];
 	var maxScoreArray = []
 	for(x in arrayScore){
@@ -404,22 +532,88 @@ function showPointsOfColour(i){
 		}
 	}
 	var cards = $("#row"+i).children(".container_card")
-	var selected = maxScoreArray.slice(maxScoreArray.length-3);
+	var threeBiggestScores = maxScoreArray.slice(maxScoreArray.length-3);
 	for( var j=0; j< cards.length;j++ ){
 		var nameCardInside = getName(cards[j]);
-		var cardScore = getScore(arrayScore[nameCardInside])
+		var cardScore = getScore(arrayScore[nameCardInside],nameCardInside);
+		if((threeBiggestScores.indexOf(nameCardInside)>-1||nameCardInside=="plus2") &&(nameCardInside !="as") ){
+			finalScore["player"+i] += cardScore;
+			window.setTimeout(function(j,cardScore){
+				var popUp = document.createElement("div");
+				if(cardScore==0 ){
+					$(popUp).html("<p>"+cardScore+"</p>").addClass("animated fadeInUp texto_score cero").appendTo(cards[j])
+				}
+				else{
+					$(popUp).html("<p>+"+cardScore+"</p>").addClass("animated fadeInUp texto_score plus").appendTo(cards[j])
+				}
+				window.setTimeout(function(popUp){
+					$(popUp).removeClass("fadeInUp").addClass("fadeOutDown")
+					},700,popUp)
+				if(j==cards.length-1){
+					window.setTimeout(function(i){
+						if(i==0){
+							$("#row"+i).children(".name_of_player").html("Player"+":  <p class='points animated fadeIn'>"+finalScore["player"+i]+"</p>")
+						}
+						else{
+							$("#row"+i).children(".name_of_player").html("Opponent #"+i+": <p class='points animated fadeIn'>"+finalScore["player"+i]+"</p>")
+						}
+					},700,i)
+				}
+			},(cards.length)*800*i+skipAses(nameCardInside,j)*800+initTime,j,cardScore)
+		}
+		else if(nameCardInside != "as"){
+			finalScore["player"+i] -= cardScore;
+			window.setTimeout(function(j,cardScore){
+			var popUp = document.createElement("div");
+			if(cardScore==0 ){
+				$(popUp).html("<p>"+cardScore+"</p>").addClass("animated fadeInUp texto_score cero").appendTo(cards[j])
+			}
+			else{
+				$(popUp).html("<p>-"+cardScore+"</p>").addClass("animated fadeInUp texto_score minus").appendTo(cards[j])
+			}
+			window.setTimeout(function(popUp){
+				$(popUp).removeClass("fadeInUp").addClass("fadeOutDown")
+				},700,popUp)
+			},(cards.length)*800*i+skipAses(nameCardInside,j)*800+initTime,j,cardScore)
+		}
 	}
 }
 
-function getScore(n){
-	if(n==0){
-		return 0
+function skipAses(nameCardInside,j){
+	if(nameCardInside == "plus2"){
+		return j-1
 	}
-	if(n==1){
-		return 1
+	else{
+		return j
 	}
-	if(n==2){
-		return 3
+}
+
+function getScore(n,card){
+	if(card =="plus2"){
+		return 2*n
+	}
+	else{
+		if(n==0){
+			return 0
+		}
+		if(n==1){
+			return 1
+		}
+		if(n==2){
+			return 3
+		}
+		if(n==3){
+			return 6
+		}
+		if(n==4){
+			return 10
+		}
+		if(n==5){
+			return 15
+		}
+		if(n>=6){
+			return 21
+		}		
 	}
 }
 
@@ -429,7 +623,7 @@ function getName(div){
 }
 
 function regExpName(text){
-	var myRe  = /\/[a-z]+(?=.png)/
+	var myRe  = /\/[a-z2]+(?=.png)/
 	var result = text.match(myRe);
 	return result[0].substr(1)
 }
