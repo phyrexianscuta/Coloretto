@@ -197,13 +197,6 @@
 	.texto_youStart{
 		height:130px;
 	}
-	
-	.highlightCurrentPlayer{
-		background:rgba(240,34,34,0.5);
-	}
-	.highlightHumanPlayer{
-		background: rgba(251, 245, 54,0.7)
-	}
 </style>
 <link href="animate.css" rel="stylesheet" type="text/css">
 <script>
@@ -278,10 +271,9 @@ startGame()
 function startGame(){
 	var	nextPlayer = 0
 	if(nextPlayer>0){
-		nextMoveInTimeN(nextPlayer,2000);
-/*		window.setTimeout(function(nextPlayer){
+		window.setTimeout(function(nextPlayer){
 				makeMove(nextPlayer);	
-			}, 2000, nextPlayer);*/
+			}, 2000, nextPlayer);
 		}
 	else{
 		var youStart = document.createElement("div");
@@ -410,9 +402,10 @@ function addEventListeners(){
 			else{
 				rows[($(this)[0].id)[8]].push(ui.helper[0].alt[0]);
 			}
-			$("#row0").removeClass("highlightHumanPlayer",1000).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown").removeClass("fadeInUp");
-			showWhoIsPlaying(1,500);
-			nextMoveInTimeN(1,3000);
+			showWhoIsPlaying(1);
+			window.setTimeout(function(){
+				makeMove(1)
+			},2000 );
 		},
 		accept: function(){
 			if(rows[($(this)[0].id)[8]].length<3 && !$($(this)[0].children[0]).hasClass("rotated")){
@@ -462,7 +455,7 @@ function doubleClickRow(event){
 		}
 		updateCards();
 		rows[$(this)[0].parentNode.id[8]] = []
-		$("#row0").removeClass("highlightHumanPlayer",1000).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown").removeClass("fadeInUp");
+		showWhoIsPlaying(1);
 		if(checkAllRowsTaken()){
 			if(lastRound){
 				var text_finish = document.createElement("div");
@@ -500,13 +493,15 @@ function doubleClickRow(event){
 						$($("img[src$='rows.png']")[j]).removeClass("rotated",500).css("transform","");
 					},j*600+600,j);
 				}
-				showWhoIsPlaying(1,3000);
-				nextMoveInTimeN(1,5000);
+				window.setTimeout(function(){
+					makeMove(1)
+				},2000 );
 			}
 		}
 		else{
-			showWhoIsPlaying(1,1000);
-			nextMoveInTimeN(1,3000);
+			window.setTimeout(function(){
+				makeMove(1)
+			},2000 );
 		}
 	}
 }
@@ -795,90 +790,67 @@ function checkAllRowsTaken(){
 }
 
 function makeMove(player){
+/*	showWhoIsPlaying(player)
+*/	/*bestMove = minimax(player, players, colorettoDeck);*/	
 	var bestMove = new Object();
 	bestMove.kind = "takeRow";
 	var options = [];
 	var rows = $("img[src$='rows.png']")
-	var nextRound = false
+	var flag = false
 	for(var i=0; i< rows.length;i++){
 		if(!isRotated(rows[i])){
 			options.push(i)
 		}
 	}
 	bestMove.index = options[0];
-
+	
 	if(bestMove.kind == "takeRow"){
 		double_Click_Row(bestMove.index,player);
 		if(checkAllRowsTaken()){
-			nextRound = true
+			flag = true
 		}
 	}
 	else if(bestMove.kind == "drawCard"){
 		
 	}
 	if((player+1)%num_players > 0){
-		nextOpp(player,nextRound);
+		nextOpp(player,flag);
 	}
 	else{
-		nextHuman(player,nextRound)
+		nextHuman(player,flag)
 	}
 }
 
-/*
 function showWhoIsPlaying(player){
-	if(player>0){
-	$("#row"+player).addClass("highlightCurrentPlayer",1000).children(".name_of_player").html("Opponent #"+player+": <p class='playingMsg animated fadeInUp' id='playingMessage'>Playing...</p>");
+	$("#row"+player).children(".name_of_player").html("Opponent #"+player+": <p class='playingMsg animated fadeInUp' id='playingMessage'>Playing...</p>");
+}
+
+function nextOpp(player,flag){
+	showWhoIsPlaying(player+1);
+	if(flag){
+		window.setTimeout(function(){
+			$("#row"+player).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown").removeClass("fadeInUp");
+			makeMove(1+player)
+		},4000 );
 	}
 	else{
-	$("#row"+player).addClass("highlightHumanPlayer",1000).children(".name_of_player").html("Player: <p class='playingMsg animated fadeInUp' id='playingMessage'>Your turn!</p>");
-	}
-}
-*/
-
-function showWhoIsPlaying(player,time){
-	window.setTimeout(function(player){
-/*		showWhoIsPlaying(player)*/
-			if(player>0){
-				$("#row"+player).addClass("highlightCurrentPlayer",1000).children(".name_of_player").html("Opponent #"+player+": <p class='playingMsg animated fadeInUp' id='playingMessage'>Playing...</p>");
-				}
-			else{
-				$("#row"+player).addClass("highlightHumanPlayer",1000).children(".name_of_player").html("Player: <p class='playingMsg animated fadeInUp' id='playingMessage'>Your turn!</p>");
-				}
-	},time,player);
-}
-
-function nextMoveInTimeN(player,time){
-	window.setTimeout(function(player){
-		makeMove(player)
-	},time,player);
-}
-
-function nextOpp(player,nextRound){
-	$("#row"+player).removeClass("highlightCurrentPlayer",1000).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown").removeClass("fadeInUp");
-	if(nextRound){
-		showWhoIsPlaying(player+1,3000);
-		nextMoveInTimeN(player+1,5000);
-	}
-	else{
-		showWhoIsPlaying(player+1,1000);
-		nextMoveInTimeN(player+1,3000);
+		window.setTimeout(function(){
+			$("#row"+player).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown").removeClass("fadeInUp");
+			makeMove(player+1)
+		},3000 );
 	}
 }
 
-function nextHuman(player,nextRound){
-		$("#row"+player).removeClass("highlightCurrentPlayer",1000).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown fadeOutPlayingMsg").removeClass("fadeInUp");
-
-		if(nextRound){
-			showWhoIsPlaying(0,3000);
+function nextHuman(player,flag){
+		if(flag){
 			window.setTimeout(function(){
+				$("#row"+player).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown fadeOutPlayingMsg").removeClass("fadeInUp");
 				playing = true;
 			},4000)
 		}
 		else{
-			showWhoIsPlaying(0,1000)
-			window.setTimeout(function(){
-				playing = true;
-			},2000);
+			$("#row"+player).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown fadeOutPlayingMsg").removeClass("fadeInUp");
+			playing = true;			
 		}
 }
 </script>
