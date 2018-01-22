@@ -396,7 +396,7 @@ function prepareDeck(){
 }
 
 function addEventListeners(){
-	$("#card_back").on("dblclick",doubleClickDeck);
+	$("#card_back").on("dblclick",doubleClickDeckPerson);
 	$(".common_cards_zone .row_opt").droppable({
 		classes: {"ui-droppable-hover": "ui-state-hover"},
 		drop: function(event,ui){
@@ -423,9 +423,10 @@ function addEventListeners(){
 	$("img[src$='rows.png']").on("dblclick",doubleClickRow);
 }
 
-function doubleClickDeck(){
+function doubleClickDeckPerson(){
 	if($("#card_to_play").html()==" " && !checkRowsFull() && playing ){
-			var newCard = document.createElement("img");
+		addNextCardDoubleClickDeck()
+/*			var newCard = document.createElement("img");
 			$(newCard).attr("src","cards/"+checkTopCard()+".png" ).addClass("card_to_play_class").attr("alt",checkTopCard() ).appendTo("#card_to_play").draggable({containment: ".common_cards_zone", scroll: false, snap: ".row", snapMode: "inner", helper:"clone",opacity: 0.6});
 			if(colorettoDeck.cards[colorettoDeck.cards.length-1]=="e" ){
 				$(newCard).draggable('disable');
@@ -448,6 +449,63 @@ function doubleClickDeck(){
 			else{
 				colorettoDeck.cards.pop()
 			}
+*/			
+	}
+}
+
+function addNextCardDoubleClickDeck(){
+	var newCard = document.createElement("img");
+	$(newCard).attr("src","cards/"+checkTopCard()+".png" ).addClass("card_to_play_class").attr("alt",checkTopCard() ).appendTo("#card_to_play").draggable({containment: ".common_cards_zone", scroll: false, snap: ".row", snapMode: "inner", helper:"clone",opacity: 0.6});
+	if(colorettoDeck.cards[colorettoDeck.cards.length-1]=="e" ){
+		$(newCard).draggable('disable');
+		var text_last_round = document.createElement("div");
+		$(text_last_round).html("<p>Last round!</p>").addClass("animated fadeInUpBig texto_end_round").appendTo($("#main_page"));
+		window.setTimeout(function(){
+			$(text_last_round).removeClass("fadeInUpBig").addClass("fadeOutUpBig");
+			$($("#card_to_play")[0].children[0]).addClass("animated fadeOutUpBig");
+			window.setTimeout(function(){
+				$("#card_to_play").html(" ");
+				colorettoDeck.cards.pop();
+				addNextCardDoubleClickDeck();
+			},1000)
+			window.setTimeout(function(){
+				$(text_last_round).remove();
+			},2000)
+		},2000);
+		lastRound = true;
+	}
+	else{
+		colorettoDeck.cards.pop()
+	}
+}
+
+function doubleClickDeckAI(){
+	if($("#card_to_play").html()==" " && !checkRowsFull()){
+		addNextCardDoubleClickDeck();
+/*			var newCard = document.createElement("img");
+			$(newCard).attr("src","cards/"+checkTopCard()+".png" ).addClass("card_to_play_class").attr("alt",checkTopCard() ).appendTo("#card_to_play").draggable({containment: ".common_cards_zone", scroll: false, snap: ".row", snapMode: "inner", helper:"clone",opacity: 0.6});
+			if(colorettoDeck.cards[colorettoDeck.cards.length-1]=="e" ){
+				$(newCard).draggable('disable');
+				var text_last_round = document.createElement("div");
+				$(text_last_round).html("<p>Last round!</p>").addClass("animated fadeInUpBig texto_end_round").appendTo($("#main_page"));
+				window.setTimeout(function(){
+					$(text_last_round).removeClass("fadeInUpBig").addClass("fadeOutUpBig");
+					$($("#card_to_play")[0].children[0]).addClass("animated fadeOutUpBig");
+					window.setTimeout(function(){
+						$("#card_to_play").html(" ");
+						colorettoDeck.cards.pop();
+						doubleClickDeck();
+					},1000)
+					window.setTimeout(function(){
+						$(text_last_round).remove();
+					},2000)
+				},2000);
+				lastRound = true;
+			}
+			else{
+				colorettoDeck.cards.pop()
+			}
+*/			
 	}
 }
 
@@ -620,6 +678,28 @@ function finalCount(initTime){
 	for (var i=0; i < num_players;i++){
 		showPointsOfColour(i,initTime)
 	}
+}
+
+function puntaje(i){
+	var arrayScore= window.players[i];
+	var maxScoreArray = []
+	for(x in arrayScore){
+		if(x !="as" && x !="plus2" ){
+			maxScoreArray.push(x);
+		}
+	}
+	for(var j=maxScoreArray.length-1; j >=0 ;j--){
+		for(var k=0; k <=j ;k++){
+			if(arrayScore[maxScoreArray[k]] > arrayScore[maxScoreArray[k+1]]){
+				var temp =  maxScoreArray[k];
+				maxScoreArray[k] = maxScoreArray[k+1];
+				maxScoreArray[k+1] = temp;		
+			}
+		}
+	}
+	var cards = $("#row"+i).children(".container_card")
+	var threeBiggestScores = maxScoreArray.slice(maxScoreArray.length-3);
+	
 }
 
 function showPointsOfColour(i,initTime){
@@ -795,33 +875,86 @@ function checkAllRowsTaken(){
 }
 
 function makeMove(player){
-	var bestMove = new Object();
-	bestMove.kind = "takeRow";
-	var options = [];
-	var rows = $("img[src$='rows.png']")
+	var bestMove = minimax();
 	var nextRound = false
-	for(var i=0; i< rows.length;i++){
-		if(!isRotated(rows[i])){
+	if(bestMove.kind == "takeRow"){
+		double_Click_Row(bestMove.index,player);
+		if(checkAllRowsTaken()){
+			nextRound = true;
+		}
+		if((player+1)%num_players > 0){
+			removePlayingMessage(player,1000)
+			nextOpp(player,nextRound,3000,5000,1000,3000);
+		}
+		else{
+			removePlayingMessage(player,1000)
+			nextHuman(player,nextRound,3000,4000,1000,2000)
+		}
+	}
+	else if(bestMove.kind == "drawCard"){
+		doubleClickDeckAI();
+		addCardToRow(bestMove.index,500,400);
+		if((player+1)%num_players > 0){
+			removePlayingMessage(player,(num_players -bestMove.index)*400+2000)
+			nextOpp(player,nextRound,3000+(num_players-bestMove.index)*400,5000+(num_players-bestMove.index)*400,1000+(num_players-bestMove.index)*400,3000+(num_players-bestMove.index)*400);
+		}
+		else{
+			removePlayingMessage(player,(num_players -bestMove.index)*400+2000)
+			nextHuman(player,nextRound,3000+(num_players-bestMove.index)*400,4000+(num_players-bestMove.index)*400,1000+(num_players-bestMove.index)*400,2000+(num_players-bestMove.index)*400)
+		}
+	}
+}
+
+function minimax(){
+	var bestMove = new Object();
+	
+	
+	
+	
+	
+	if(Math.floor(Math.random()*10+1)>5){
+		bestMove.kind = "takeRow";
+	}	
+	/*
+	if(0>5){
+		bestMove.kind = "takeRow";
+	}
+	*/
+	else{
+		bestMove.kind = "drawCard";
+	}
+	
+	var options = [];
+	var rows  = window.rows;
+	var rowsImages = $("img[src$='rows.png']")
+
+	for(var i=0; i< rowsImages.length;i++){
+		if(!isRotated(rowsImages[i]) && rows[i].length<3){
 			options.push(i)
 		}
 	}
 	bestMove.index = options[0];
+	return bestMove
+}
 
-	if(bestMove.kind == "takeRow"){
-		double_Click_Row(bestMove.index,player);
-		if(checkAllRowsTaken()){
-			nextRound = true
+function addCardToRow(n,pause,timeToReachRow){
+	window.setTimeout(function(n){	
+		var card = $("#card_to_play").children()[0];
+		$(card).animate({
+			"bottom":"+="+117*(num_players-n)+"px"
+			}
+		,timeToReachRow*(num_players-n));
+		window.setTimeout(function(){
+			$(card).removeClass().addClass("card_in_row image_row").appendTo("#row_opt_"+n);
+			$("#card_to_play").html(" ");
+		},timeToReachRow*(num_players-n));
+		if(card.alt[0]=="p"){
+			rows[n].push("2");
 		}
-	}
-	else if(bestMove.kind == "drawCard"){
-		
-	}
-	if((player+1)%num_players > 0){
-		nextOpp(player,nextRound);
-	}
-	else{
-		nextHuman(player,nextRound)
-	}
+		else{
+			rows[n].push(card.alt[0]);
+		}
+	},pause,n)
 }
 
 /*
@@ -847,38 +980,39 @@ function showWhoIsPlaying(player,time){
 	},time,player);
 }
 
+function removePlayingMessage(player,time){
+	$("#row"+player).removeClass("highlightCurrentPlayer",time).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown",time).removeClass("fadeInUp",time);
+}
+
 function nextMoveInTimeN(player,time){
 	window.setTimeout(function(player){
 		makeMove(player)
 	},time,player);
 }
 
-function nextOpp(player,nextRound){
-	$("#row"+player).removeClass("highlightCurrentPlayer",1000).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown").removeClass("fadeInUp");
+function nextOpp(player,nextRound,showPlayingNextRound,nextMoveInNextRound,ShowPlaying,nextMove){
 	if(nextRound){
-		showWhoIsPlaying(player+1,3000);
-		nextMoveInTimeN(player+1,5000);
+		showWhoIsPlaying(player+1,showPlayingNextRound);
+		nextMoveInTimeN(player+1,nextMoveInNextRound);
 	}
 	else{
-		showWhoIsPlaying(player+1,1000);
-		nextMoveInTimeN(player+1,3000);
+		showWhoIsPlaying(player+1,ShowPlaying);
+		nextMoveInTimeN(player+1,nextMove);
 	}
 }
 
-function nextHuman(player,nextRound){
-		$("#row"+player).removeClass("highlightCurrentPlayer",1000).children(".name_of_player").children("#playingMessage").addClass("fadeOutDown fadeOutPlayingMsg").removeClass("fadeInUp");
-
+function nextHuman(player,nextRound,showPlayingNextRound,allowPlayingNextRound,showPlaying,allowPlaying){
 		if(nextRound){
-			showWhoIsPlaying(0,3000);
+			showWhoIsPlaying(0,showPlayingNextRound);
 			window.setTimeout(function(){
 				playing = true;
-			},4000)
+			},allowPlayingNextRound)
 		}
 		else{
-			showWhoIsPlaying(0,1000)
+			showWhoIsPlaying(0,showPlaying)
 			window.setTimeout(function(){
 				playing = true;
-			},2000);
+			},allowPlaying);
 		}
 }
 </script>
